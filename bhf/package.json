@@ -1,8 +1,8 @@
 {
-    "name": "mix-honey",
-    "version": "0.0.1",
-    "description": "合并honey的依赖库",
-    "dependencies": {
-
-    }
+  "name": "bhf",
+  "version": "0.0.1",
+  "description": "bhf",
+  "dependencies": {
+    "fs-extra": "^0.13.0"
+  }
 }
