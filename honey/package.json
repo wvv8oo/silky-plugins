@@ -1,7 +1,7 @@
 {
-    "name": "mix-honey",
+    "name": "honey",
     "version": "0.0.1",
-    "description": "合并honey的依赖库",
+    "description": "与honey相关的功能，比如合并honey的依赖库",
     "dependencies": {
     	"cheerio": "0.15.0",
     	"lodash": ""
