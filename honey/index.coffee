@@ -1,5 +1,6 @@
 _cheerio = require 'cheerio'
 _ = require 'lodash'
+_fs = require 'fs-extra'
 
 #合并honey中的依赖
 combineHoney = (content)->
@@ -44,3 +45,13 @@ exports.registerPlugin = (silky)->
     return if not /<script\s+honey=/i.test data.content
     data.content = combineHoney data.content
     return
+
+  silky.registerHook 'build:didCompile', {async: true}, (data, options, done)->
+    return done null if not /\.html$/.test data.target
+    content = _fs.readFileSync data.target, 'utf-8'
+    return done null if not /<script\s+honey=/i.test content
+
+    content = combineHoney content
+    _fs.outputFileSync data.target, content
+    done null
+
