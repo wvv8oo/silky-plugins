@@ -1,0 +1,9 @@
+{
+  "name": "autoprefix",
+  "version": "0.0.1",
+  "description": "处理less的CSS3前缀问题",
+  "dependencies": {
+    "autoprefixer-core": "^5.0.0",
+    "fs-extra": "^0.15.0"
+  }
+}
