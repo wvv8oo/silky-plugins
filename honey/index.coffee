@@ -1,24 +1,24 @@
 _cheerio = require 'cheerio'
 _ = require 'lodash'
 _fs = require 'fs-extra'
-_uglify = require 'uglify-js'
+#_uglify = require 'uglify-js'
 
-#压缩内联的js
-compressInternalJavascript = (file, content)->
-  try
-    console.log "压缩honey"
-    content = _uglify.minify(content, fromString: true).code
-  catch e
-    console.log "压缩HTML中的JS代码出错，详细错误如下：".red
-    console.log "错误的文件 -> #{file}".red
-    console.log content
-    console.log e
-    process.exit 0
-
-  content
+##压缩内联的js
+#压缩JS后期会交给Silky，不需要在Honey中处理
+#compressInternalJavascript = (file, content)->
+#  try
+#    content = _uglify.minify(content, fromString: true).code
+#  catch e
+#    console.log "压缩HTML中的JS代码出错，详细错误如下：".red
+#    console.log "错误的文件 -> #{file}".red
+#    console.log content
+#    console.log e
+#    process.exit 0
+#
+#  content
 
 #合并honey中的依赖
-combineHoney = (file, content, compress)->
+combineHoney = (content)->
   $ = _cheerio.load content
   deps = []
   scripts = []
@@ -43,7 +43,7 @@ combineHoney = (file, content, compress)->
   html += '\n\t});'
 
   #压缩内联的js
-  html = compressInternalJavascript file, html if compress
+#  html = compressInternalJavascript file, html if compress
 
   html = "<script type='javascript'>\n#{html}\n</script>"
   #将新的html合并到body里
@@ -67,7 +67,7 @@ exports.registerPlugin = (silky)->
     content = _fs.readFileSync data.target, 'utf-8'
     return done null if not /<script\s+honey=/i.test content
 
-    content = combineHoney data.target, content, silky.options.build.compress.internal
+    content = combineHoney content
     _fs.outputFileSync data.target, content
     done null
 
