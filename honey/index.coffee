@@ -45,7 +45,7 @@ combineHoney = (content)->
   #压缩内联的js
 #  html = compressInternalJavascript file, html if compress
 
-  html = "<script type='javascript'>\n#{html}\n</script>"
+  html = "<script type='text/javascript'>\n#{html}\n</script>"
   #将新的html合并到body里
   $('body').append html
   $.html()
