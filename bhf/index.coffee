@@ -26,7 +26,7 @@ exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky)->
   #在预处理结束后，合并掉指
-  silky.registerHook 'build:didMake', {}, (data, options, done)->
+  silky.registerHook 'build:didMake', {}, (data, done)->
     jsPath = _path.join data.output, 'js'
     modules = ['assets', 'comment', 'commit', 'global-directives',
                'issue', 'member', 'project', 'services', 'report']
