@@ -53,8 +53,8 @@ combineHoney = (content)->
 #标识这是一个silky插件
 exports.silkyPlugin = true
 #提供注册插件的入口
-exports.registerPlugin = (silky)->
-  silky.registerHook 'route:willResponse', {}, (data, options, done)->
+exports.registerPlugin = (silky, pluginOptions)->
+  silky.registerHook 'route:willResponse', {}, (data, done)->
     #非html不用处理
     return if not /\.html$/.test data.request.url
     #在不包含<script honey=的页面，不需要处理
@@ -62,7 +62,7 @@ exports.registerPlugin = (silky)->
     data.content = combineHoney data.content
     return
 
-  silky.registerHook 'build:didCompile', {async: true}, (data, options, done)->
+  silky.registerHook 'build:didCompile', {async: true}, (data, done)->
     return done null if not /\.html$/.test data.target
     content = _fs.readFileSync data.target, 'utf-8'
     return done null if not /<script\s+honey=/i.test content
