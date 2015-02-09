@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{$$.plugin.post.title}} - {{$$.plugin.blog.title}}</title>
+  {{import "module/head"}}
+</head>
+<body class="home-template">
+  {{import "module/header"}}
+  <div class="content container">
+      <div class="post">
+        <h1>{{$$.plugin.post.title}}</h1>
+        <span class="post-date">{{date $$.plugin.post.publish_date 'YYYY-MM-DD hh:mm'}}</span>
+        {{{plugin_markdown $$.plugin.post.content}}}
+      </div>
+
+      <div class="related">
+          <h2>相关文章</h2>
+          <ul class="posts">
+            {{#if $$.plugin.post.previous}}
+                <li class="previous">
+                    前一篇: <a href="{{$$.plugin.post.previous.url}}">{{$$.plugin.post.previous.title}}</a>
+                </li>
+            {{/if}}
+            {{#if $$.plugin.post.next}}
+                <li class="next">
+                    下一篇: <a href="{{$$.plugin.post.next.url}}">{{$$.plugin.post.next.title}}</a>
+                </li>
+            {{/if}}
+            <!--
+            {{#if $$.plugin.post.tags}}
+                <li class="tag">
+                    标签:
+                  {{#each $$.plugin.post.tags}}
+                      <a href="/tag/{{.}}">{{.}}</a>
+                  {{/each}}
+                </li>
+            {{/if}}
+            -->
+          </ul>
+      </div>
+  </div>
+</body>
+</html>

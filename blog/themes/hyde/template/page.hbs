@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{$$.plugin.post.title}} - {{$$.plugin.blog.title}}</title>
+  {{import "module/head"}}
+</head>
+
+<body class="home-template">
+{{import "module/header"}}
+<div class="content container">
+    <div class="post">
+        <h1>{{$$.plugin.post.title}}</h1>
+      {{{plugin_markdown $$.plugin.post.content}}}
+    </div>
+</div>
+{{import "module/footer"}}
+</body>
+</html>
