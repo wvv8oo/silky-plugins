@@ -16,7 +16,7 @@ exports.registerPlugin = (silky, pluginOptions)->
   #build完成后，提交到指定服务器
   silky.registerHook 'build:didBuild', {async: true}, (data, done)->
     projectName = pluginOptions.projectName || _path.basename(silky.options.workbench)
-    server = pluginOptions.server
+    server = silky.options.extra || pluginOptions.server
     #用户没有指定全url
     server = "http://192.168.8.#{server}:1518" if server.indexOf('http://') < 0
     tarFile = _path.join __dirname, projectName + '.tar'
@@ -70,20 +70,14 @@ deliverProject = (tarFile, projectName, server, cb)->
 
   _request options, (err, res, body)->
     console.log JSON.stringify(err).red if err
+
+    if res.statusCode isnt 200
+      message = '代理服务器返回状态码不正确，请检查'
+      console.log message.red
+      err = new Error(message)
+
     return cb err if err
 
     console.log "分发成功 -> #{JSON.stringify(body)}".green
-
-    description = '分发完成'
-    if err
-      description += "，但递送到代理服服务器发生错误"
-    else if res and res.statusCode isnt 200
-      description += "，但服务器返回状态码不正确->#{res.statusCode}"
-      description = description.red
-
-
-    if res.statusCode isnt 200
-      err = new Error('代理服务器返回状态码不正确，请检查')
-      return cb err
-
+    console.log "参考访问地址：http://honey2.hunantv.com/#{projectName}"
     cb err
