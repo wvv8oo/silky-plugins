@@ -66,7 +66,7 @@ deliverProject = (tarFile, projectName, server, cb)->
     method: 'POST'
     json: true
     formData: formData
-    timeout: 1000 * 5
+    timeout: 1000 * 60 * 30
 
   _request options, (err, res, body)->
     console.log JSON.stringify(err).red if err
