@@ -23,12 +23,6 @@ exports.execute = (data, cb)->
 
   _async.series tasks, cb
 
-isDataMatch = (path)->
-  dataDir = _utils.global.options.dataDir || './'
-  basePath = _path.resolve _utils.global.silky.options.workbench, dataDir
-
-  path.indexOf(basePath) is 0
-
 #处理单个主题文件
 buildThemeFile = (source, target, cb)->
   silky = _utils.global.silky

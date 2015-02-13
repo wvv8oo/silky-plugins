@@ -209,3 +209,10 @@ exports.compiler = (pluginData, template, target, cb )->
     target: _path.join _global.silky.options.output, target
 
   _global.silky.compiler 'hbs', templateFile, options, cb
+
+#检查目录是否为数据目录
+exports.pathIsDataDirectory = (path)->
+  dataDir = _global.options.dataDir || './'
+  basePath = _path.resolve _global.silky.options.workbench, dataDir
+
+  path.indexOf(basePath) is 0
