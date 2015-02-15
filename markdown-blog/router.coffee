@@ -15,7 +15,7 @@ exports.didRequest = (data, done)->
   #不是配置的bashPath开头的，则不处理
   url = data.route.url
   basePath = _utils.global.options.basePath || '/'
-  return if url.indexOf(basePath) isnt 0
+  return done null if url.indexOf(basePath) isnt 0
 
   relativeUrl = url.replace basePath, ''
   #首页
@@ -23,12 +23,15 @@ exports.didRequest = (data, done)->
     data.route.type = 'html'
     relativeUrl  = '/'
 
-  return if rssHandler data, relativeUrl
+  return done null if rssHandler data, relativeUrl
 
   #检查是否theme内的静态文件
-  return templateHandler data, relativeUrl if data.route.type is 'html'
+  if data.route.type is 'html'
+    templateHandler data, relativeUrl
+    return done null
+
   #处理其它静态文件
-  staticHandler data, relativeUrl
+  staticHandler data, relativeUrl, done
 
 #处理rss
 rssHandler = (data, relativeUrl)->
@@ -40,15 +43,32 @@ rssHandler = (data, relativeUrl)->
   res.setHeader 'content-type', 'application/rss+xml'
   res.end _rss.generator()
 
-#响应静态文件
-staticHandler = (data, relativeUrl)->
-  data.route.realpath = _path.join _utils.global.themeDir, relativeUrl
+#处理404的错误
+notFoundHandler = (data)->
+  data.route.realpath = _utils.getTemplateFile '404'
+  data.route.type = data.route.compiler = 'hbs'
+  data.route.mime = 'text/html'
+  data.pluginData = _utils.getBaseData()
 
-  if not _fs.existsSync(data.route.realpath)
-    data.route.realpath = _path.join(_utils.global.themeDir, 'template', '404.hbs')
-    data.route.type = data.route.compiler = 'hbs'
-    data.route.mime = 'text/html'
-    data.pluginData = _utils.getBaseData()
+#响应静态文件
+staticHandler = (data, relativeUrl, cb)->
+  data.route.realpath = _path.join _utils.global.themeDir, relativeUrl
+  #文件存在，则直接返回
+  return cb null if _fs.existsSync(data.route.realpath)
+
+  compiler = _utils.global.silky.compiler
+
+  #取得真实的源文件路径
+  realpath = compiler.sourceFile data.route.compiler, data.route.realpath
+
+  if realpath
+    data.route.realpath = realpath
+  else
+    #如果没有找到匹配的源文件，则按404处理
+    notFoundHandler data
+
+  return cb null
+
 
 #响应html，处理模板
 templateHandler = (data, relativeUrl)->
@@ -58,7 +78,7 @@ templateHandler = (data, relativeUrl)->
   if relativeUrl is '/' or relativeUrl is maps.home
     data.route.compiler = 'hbs'
     data.pluginData = _utils.getIndexData()
-    data.route.realpath = _utils.getTemplateFile('index')
+    data.route.realpath = _utils.getTemplateFile('home')
     data.route.mime = 'text/html'
     return true
 

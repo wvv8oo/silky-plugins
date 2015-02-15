@@ -169,7 +169,8 @@ getPagination = (pageIndex, pageSize, recordTotal)->
 #获取主题的目录
 setThemeDirectory = ->
   theme = _global.options.theme || 'hyde'
-  _global.themeDir = _path.join _global.silky.options.workbench, theme, 'template'
+  _global.themeDir = _path.join _global.silky.options.workbench, 'themes', theme
+  console.log _global.themeDir
   #工作目录下没有主题，则考虑系统默认主题
   if not _fs.existsSync(_global.themeDir)
     _global.themeDir = _path.join __dirname, 'themes', theme
@@ -183,6 +184,7 @@ setThemeDirectory = ->
 mergeTemplateMap = ()->
   #默认映射
   defaultTemplateMap =
+
     #索引页_templateMap
     index: '/index.html'
     #文章页
@@ -208,7 +210,7 @@ exports.compiler = (pluginData, template, target, cb )->
     pluginData: pluginData
     target: _path.join _global.silky.options.output, target
 
-  _global.silky.compiler 'hbs', templateFile, options, cb
+  _global.silky.compiler.execute 'hbs', templateFile, options, cb
 
 #检查目录是否为数据目录
 exports.pathIsDataDirectory = (path)->

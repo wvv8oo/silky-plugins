@@ -31,7 +31,7 @@ buildThemeFile = (source, target, cb)->
     target: target
     save: true
 
-  silky.compiler fileType, source, options, (err, content)->
+  silky.compiler.execute fileType, source, options, (err, content)->
     #如果没有编译成功，则复制文件
     _fs.copySync source, target if content is false
     cb null
@@ -81,13 +81,15 @@ buildHome = (cb)-> buildIndexPage 1, true, cb
 
 #构建索引页
 buildIndexPage = (pageIndex, isHome, cb)->
-  target =
-    if isHome
-      _utils.global.options.templateMap.home
-    else
-      pageIndex + _utils.global.options.extname
 
-  _utils.compiler _utils.getIndexData(pageIndex), 'index', target, cb
+  if isHome
+    target = _utils.global.options.templateMap.home
+    template = 'home'
+  else
+    target = pageIndex + _utils.global.options.extname
+    template = 'index'
+
+  _utils.compiler _utils.getIndexData(pageIndex), template, target, cb
 
 #404页面
 build404 = (cb)->

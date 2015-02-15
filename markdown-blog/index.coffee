@@ -35,6 +35,6 @@ exports.registerPlugin = (silky, pluginOptions)->
 
 
   #接管路由
-  silky.registerHook 'route:didRequest', {}, (data, done)-> _router.didRequest(data, done)
+  silky.registerHook 'route:didRequest', {async: true}, (data, done)-> _router.didRequest(data, done)
 
 
