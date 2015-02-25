@@ -7,7 +7,7 @@
     "fs-extra": "^0.16.3",
     "lodash": "^3.0.0",
     "marked": "^0.3.3",
-    "md2json": "0.0.3",
+    "md2json": "^0.0.3",
     "rss": "^1.1.1",
     "url-relative": "^1.0.0"
   }

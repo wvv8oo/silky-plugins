@@ -18,6 +18,7 @@ exports.silkyPlugin = true
 exports.registerPlugin = (silky, pluginOptions)->
   _utils.registerPlugin silky, pluginOptions
 
+  silky.registerHandlebarsHelper 'plugin_toc', _utils.tocHelper
   #注册一个markdown的helper
   silky.registerHandlebarsHelper 'plugin_markdown', _utils.markdownHelper
   #注册一个根据url获取文章内容的helper

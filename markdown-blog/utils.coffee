@@ -119,6 +119,9 @@ exports.loadMarkdown = ->
 exports.markdownHelper = (content, options)->
   _marked(content || '')
 
+#获取TOC
+exports.tocHelper = (content, options)->
+
 #根据url获取文章的内容
 exports.contentHelper = (url, options)->
   content = _storage.getPostContent url

@@ -23,12 +23,17 @@ exports.execute = (data, cb)->
 
   _async.series tasks, cb
 
+#替换掉扩展名
+replaceTargetExt = (target)->
+  maps = coffee: 'js', hbs: 'html', less: 'css'
+  target.replace /\.(coffee|hbs|less)$/i, (full, ext)-> ".#{maps[ext] || ext}"
+
 #处理单个主题文件
 buildThemeFile = (source, target, cb)->
   silky = _utils.global.silky
   fileType = silky.detectFileType source
   options =
-    target: target
+    target: replaceTargetExt target
     save: true
 
   silky.compiler.execute fileType, source, options, (err, content)->
