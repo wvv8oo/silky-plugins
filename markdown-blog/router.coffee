@@ -52,14 +52,18 @@ notFoundHandler = (data)->
 
 #响应静态文件
 staticHandler = (data, relativeUrl, cb)->
+  silky = _utils.global.silky
+  #优先考虑工作目录下是否存在
+  data.route.realpath = _path.join silky.options.workbench, relativeUrl
+  return cb null if _fs.existsSync(data.route.realpath)
+
+  #如果不存在，则考虑可能是在theme目录下
   data.route.realpath = _path.join _utils.global.themeDir, relativeUrl
   #文件存在，则直接返回
   return cb null if _fs.existsSync(data.route.realpath)
 
-  compiler = _utils.global.silky.compiler
-
   #取得真实的源文件路径
-  realpath = compiler.sourceFile data.route.compiler, data.route.realpath
+  realpath = silky.compiler.sourceFile data.route.compiler, data.route.realpath
 
   if realpath
     data.route.realpath = realpath
