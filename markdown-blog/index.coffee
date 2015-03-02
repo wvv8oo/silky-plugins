@@ -28,12 +28,18 @@ exports.registerPlugin = (silky, pluginOptions)->
   silky.registerHook 'build:initial', {}, -> _utils.loadMarkdown()
   silky.registerHook 'build:willProcess', {}, (data)->
     #忽略数据目录下所有的markdown文件
-    data.ignore = _utils.pathIsDataDirectory(data.source) and /md|markdown$/i.test data.source
+    if _utils.pathIsDataDirectory(data.source) and /md|markdown$/i.test data.source
+      data.ignore = true
+      return
+
+    #忽略掉themes文件
+    if data.source is _utils.global.themeDir
+      data.ignore = true
+      return
 
   #全部构建完成
   silky.registerHook 'build:didMake', {async: true}, (data, done)->
     _build.execute data, done
-
 
   #接管路由
   silky.registerHook 'route:didRequest', {async: true}, (data, done)-> _router.didRequest(data, done)
