@@ -51,7 +51,7 @@ packageProject = (output, tarFile, cb)->
     console.log message
 
   exec.stderr.on 'data', (message)->
-    console.log message.red
+    console.log message
 
 #分发项目
 deliverProject = (tarFile, projectName, server, cb)->
@@ -81,5 +81,5 @@ deliverProject = (tarFile, projectName, server, cb)->
     return cb err if err
 
     console.log "分发成功 -> #{JSON.stringify(body)}".green
-    console.log "参考访问地址：http://honey2.hunantv.com/#{projectName}"
+    console.log "参考访问地址：http://honey.hunantv.com/#{projectName}/"
     cb err
