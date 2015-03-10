@@ -19,10 +19,12 @@ exports.registerPlugin = (silky, pluginOptions)->
     server = silky.options.extra || pluginOptions.server
     #用户没有指定全url
     server = "http://192.168.8.#{server}:1518" if server.indexOf('http://') < 0
-    tarFile = _path.join __dirname, projectName + '.tar'
+    #兼容windows，使用绝对路径tar打包会报错
+    ﻿tarFile =  "../#{projectName}.tar"
 
     #打包项目
     packageProject(data.output, tarFile, (err)->
+      tarFile = _path.join data.output, tarFile
       deliverProject tarFile, projectName, server, (err)->
         _fs.unlinkSync tarFile
         done null
@@ -30,7 +32,7 @@ exports.registerPlugin = (silky, pluginOptions)->
 
 #对文件进行打包
 packageProject = (output, tarFile, cb)->
-  command = "cd #{output} && tar -cf #{tarFile} ."
+  command = "cd \"#{output}\" && tar -cf \"#{tarFile}\" ."
   options =
     env: process.env
     maxBuffer: 20 * 1024 * 1024
