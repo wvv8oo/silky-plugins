@@ -20,7 +20,7 @@ exports.registerPlugin = (silky, pluginOptions)->
     #用户没有指定全url
     server = "http://192.168.8.#{server}:1518" if server.indexOf('http://') < 0
     #兼容windows，使用绝对路径tar打包会报错
-    ﻿tarFile =  "../#{projectName}.tar"
+    tarFile = "../#{projectName}.tar"
 
     #打包项目
     packageProject(data.output, tarFile, (err)->
