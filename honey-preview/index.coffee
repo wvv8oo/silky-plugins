@@ -15,8 +15,12 @@ exports.silkyPlugin = true
 exports.registerPlugin = (silky, pluginOptions)->
   #build完成后，提交到指定服务器
   silky.registerHook 'build:didBuild', {async: true}, (data, done)->
-    projectName = pluginOptions.projectName || _path.basename(silky.options.workbench)
+    projectName = pluginOptions.project_name || pluginOptions.projectName
+    projectName = projectName || _path.basename(silky.options.workbench)
     server = silky.options.extra || pluginOptions.server
+    if not server
+      console.log "请指定分发服务器，分发失败".red
+      return done null;
     #用户没有指定全url
     server = "http://192.168.8.#{server}:1518" if server.indexOf('http://') < 0
     #兼容windows，使用绝对路径tar打包会报错

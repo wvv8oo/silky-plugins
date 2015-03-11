@@ -1,6 +1,7 @@
 {
   "name": "honey-preview",
-  "version": "0.0.2",
+  "version": "0.0.3",
+  "description": "分发到服务器的插件",
   "dependencies": {
     "request": "^2.53.0"
   }
