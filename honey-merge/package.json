@@ -1,0 +1,8 @@
+{
+  "name": "honey-merge",
+  "version": "0.0.1",
+  "description": "合并honey",
+  "dependencies": {
+    "fs-extra": "^0.16.5"
+  }
+}

@@ -4,7 +4,6 @@
 #    Description:
 
 _path = require 'path'
-_fs = require 'request'
 _child = require 'child_process'
 _request = require 'request'
 _fs = require 'fs'
