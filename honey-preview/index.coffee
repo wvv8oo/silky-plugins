@@ -9,6 +9,8 @@ _request = require 'request'
 _fs = require 'fs-extra'
 _async = require 'async'
 _ = require 'lodash'
+_qs = require 'querystring'
+
 TARGET = null
 APISERVER = null
 
@@ -51,7 +53,7 @@ packageAndDelivery = (output, deliveryServer, projectName, cb)->
   queue.push(
     (done)->
       tarFile = _path.join output, tarFile
-      deliverProject tarFile, projectName, deliveryServer, (err)->
+      deliveryWithCurl tarFile, projectName, deliveryServer, (err)->
         #删除文件
         _fs.removeSync tarFile
         done err
@@ -100,9 +102,11 @@ executeCommand = (command, cb)->
     cb code, stdout, stderr
 
   exec.stdout.on 'data',  (message)->
+    console.log message
     stdout += message
 
   exec.stderr.on 'data', (message)->
+    console.log message
     stderr += message
 
 #分析本地的commit信息
@@ -183,6 +187,24 @@ postTask = (task_server, data, cb)->
       err = new Error(message)
       process.exit 1
     cb err
+
+#通过curl的方式提交数据
+deliveryWithCurl = (tarFile, projectName, server, cb)->
+  params = _qs.stringify(project_name: projectName)
+  command = " curl -X POST -F \"#{params}\" -F \"attachment=@#{tarFile}\" #{server}"
+
+  executeCommand command, (code, stdout, stderr)->
+    err = null
+
+    if code != 0
+      message "分发项目出错，请查询错误信息"
+      console.log message.red
+      err = new Error(message)
+    else
+      console.log "分发项目成功".green
+
+    cb err
+
 
 #分发项目
 deliverProject = (tarFile, projectName, server, cb)->
