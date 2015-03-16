@@ -191,7 +191,7 @@ postTask = (task_server, data, cb)->
 #通过curl的方式提交数据
 deliveryWithCurl = (tarFile, projectName, server, cb)->
   params = _qs.stringify(project_name: projectName)
-  command = " curl -X POST –connect-timeout 9999999 -m 9999999 -F \"#{params}\" -F \"attachment=@#{tarFile}\" #{server}"
+  command = "curl -X POST -F \"#{params}\" -F \"attachment=@#{tarFile}\" #{server} --connect-timeout 9999999"
   console.log command
 
   executeCommand command, (code, stdout, stderr)->
