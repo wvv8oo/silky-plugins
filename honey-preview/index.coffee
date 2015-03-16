@@ -6,55 +6,183 @@
 _path = require 'path'
 _child = require 'child_process'
 _request = require 'request'
-_fs = require 'fs'
+_fs = require 'fs-extra'
+_async = require 'async'
+_ = require 'lodash'
+TARGET = null
+APISERVER = null
 
 #标识这是一个silky插件
 exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
+  TARGET = APISERVER = pluginOptions.task_server || "http://192.168.8.66:1517/api/task"
+  TARGET = RegExp.$1 if /192\.168\.8.(\d+)/.test TARGET
+
   #build完成后，提交到指定服务器
   silky.registerHook 'build:didBuild', {async: true}, (data, done)->
     projectName = pluginOptions.project_name || pluginOptions.projectName
     projectName = projectName || _path.basename(silky.options.workbench)
-    server = silky.options.extra || pluginOptions.server
-    if not server
+    deliveryServer = silky.options.extra || pluginOptions.server
+
+    if not deliveryServer
       console.log "请指定分发服务器，分发失败".red
-      return done null;
-    #用户没有指定全url
-    server = "http://192.168.8.#{server}:1518" if server.indexOf('http://') < 0
-    #兼容windows，使用绝对路径tar打包会报错
-    tarFile = "../#{projectName}.tar"
+      return done null
 
-    #打包项目
-    packageProject(data.output, tarFile, (err)->
-      tarFile = _path.join data.output, tarFile
-      deliverProject tarFile, projectName, server, (err)->
-        _fs.unlinkSync tarFile
-        done null
-    )
+    packageAndDelivery data.output, deliveryServer, projectName, (err)-> done null
 
-#对文件进行打包
-packageProject = (output, tarFile, cb)->
-  command = "cd \"#{output}\" && tar -cf \"#{tarFile}\" ."
+#打包并分发
+packageAndDelivery = (output, deliveryServer, projectName, cb)->
+  #用户没有指定全url
+  deliveryServer = "http://192.168.8.#{deliveryServer}:1518" if deliveryServer.indexOf('http://') < 0
+  #兼容windows，使用绝对路径tar打包会报错
+  tarFile = "../#{projectName}.tar"
+  task = {}
+
+  queue = []
+
+  #打包项目
+  queue.push(
+    (done)->
+      packageProject output, tarFile, (err)-> done err
+  )
+
+  #分发到服务器
+  queue.push(
+    (done)->
+      tarFile = _path.join output, tarFile
+      deliverProject tarFile, projectName, deliveryServer, (err)->
+        #删除文件
+        _fs.removeSync tarFile
+        done err
+  )
+
+  #收集本地git的信息
+  queue.push(
+    (done)->
+      collectGitInfo (err, data)->
+        task = data
+        done err
+  )
+
+  #提交git commit相关的任务信息
+  queue.push(
+    (done)->
+      task.target = TARGET
+      postTask APISERVER, task, -> done null
+  )
+
+  _async.waterfall queue, (err)->
+    if err
+      console.log "分发失败，请查看错误信息".red
+      console.log err
+    else
+      console.log "分发成功".green
+
+    cb null
+
+
+#执行命令
+executeCommand = (command, cb)->
   options =
     env: process.env
     maxBuffer: 20 * 1024 * 1024
 
-  console.log "准备打包文件..."
+  stdout = ''
+  stderr = ''
   exec = _child.exec command, options
+
   exec.on 'close', (code)->
     if code isnt 0
-      message = "打包文件失败，请检查是否可以使用tar命令"
-      console.log message.red
+      console.log "执行命令出错 -> #{command}".red
+      console.log
       return process.exit 1
-
-    cb null
+    cb code, stdout, stderr
 
   exec.stdout.on 'data',  (message)->
-    console.log message
+    stdout += message
 
   exec.stderr.on 'data', (message)->
-    console.log message
+    stderr += message
+
+#分析本地的commit信息
+analyzeCommit = (source)->
+  result = {}
+
+  pattern = /^commit\s+(.+)\nauthor:\s+.+<(.+)>\ndate:\s+(.+)/i
+  result.message = source.replace pattern, (match, hash, email, timestamp)->
+    result.hash = hash
+    result.email = email
+    result.timestamp = new Date(timestamp).valueOf()
+    return ''
+
+  result.message = result.message.replace(/\n/, '').trim()
+  result
+
+
+#从本地信息收集git相关的信息，包括commit, author，repos等
+collectGitInfo = (cb)->
+  data = type: 'preview'
+  queue = []
+
+  #获取git的地址
+  queue.push(
+    (done)->
+      command = "git config --get remote.origin.url"
+      executeCommand command, (code, stdout, stderr)->
+        data.repos_git = stdout.trim()
+        data.repos_url = data.repos_git.replace(/^git@(.+):(.+)\.git/i, "http://$1/$2")
+        done null
+  )
+
+  #获取最后一条git commit
+  queue.push(
+    (done)->
+      command = "git log -n 1"
+      executeCommand command, (code, stdout, ssterr)->
+        _.extend data, analyzeCommit(stdout)
+        data.url = "#{data.repos_url}/commit/#{data.hash}"
+        data.repos = data.repos_git
+        data.last_execute = new Date().valueOf()
+        done null
+
+  )
+
+  _async.waterfall queue, -> cb null, data
+
+#对文件进行打包
+packageProject = (output, tarFile, cb)->
+  command = "cd \"#{output}\" && tar -cf \"#{tarFile}\" ."
+
+  console.log "准备打包文件..."
+  executeCommand command, (code, stdout, stderr)->
+    console.log stdout
+    console.log stderr
+    console.log "文件打包完成"
+    cb null
+
+#向hoobot提交
+postTask = (task_server, data, cb)->
+  task_server = "http://127.0.0.1:1517/api/task"
+
+  options =
+    url: task_server
+    method: 'POST'
+    json: true
+    formData: data
+    timeout: 1000 * 60 * 30
+
+  _request options, (err, res, body)->
+    console.log JSON.stringify(err).red if err
+    return cb err if err
+
+    if res.statusCode isnt 200
+      message = '向hoobot服务器提交数据失败，请检查'
+      console.log message.red
+      console.log "Error Code -> #{res.statusCode}".red
+      err = new Error(message)
+      process.exit 1
+    cb err
 
 #分发项目
 deliverProject = (tarFile, projectName, server, cb)->
@@ -63,7 +191,7 @@ deliverProject = (tarFile, projectName, server, cb)->
   console.log "项目：#{projectName}"
   console.log "打包文件：#{tarFile}"
 
-  formData = projectName: projectName
+  formData = project_name: projectName
   formData.attachment = _fs.createReadStream tarFile
 
   options =
