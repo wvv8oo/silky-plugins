@@ -11,32 +11,40 @@ _async = require 'async'
 _ = require 'lodash'
 _qs = require 'querystring'
 
-TARGET = null
-APISERVER = null
+DATA =
+  target: null
+  apiServer: null
+  deliveryServer: null
 
 #标识这是一个silky插件
 exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
-  TARGET = APISERVER = pluginOptions.task_server || "http://192.168.8.66:1517/api/task"
-  TARGET = RegExp.$1 if /192\.168\.8.(\d+)/.test TARGET
+  DATA.apiServer = pluginOptions.task_server || "http://192.168.8.66:1517/api/task"
 
   #build完成后，提交到指定服务器
   silky.registerHook 'build:didBuild', {async: true}, (data, done)->
     projectName = pluginOptions.project_name || pluginOptions.projectName
     projectName = projectName || _path.basename(silky.options.workbench)
-    deliveryServer = silky.options.extra || pluginOptions.server
 
-    if not deliveryServer
+    #获取将要递送的服务器
+    DATA.deliveryServer = silky.options.extra || pluginOptions.server
+    #用户没有指定全url
+    if DATA.deliveryServer.indexOf('http://') < 0
+      DATA.deliveryServer = "http://192.168.8.#{DATA.deliveryServer}:1518"
+
+    DATA.target = DATA.deliveryServer
+    DATA.target = RegExp.$1 if /192\.168\.8.(\d+)/.test DATA.target
+
+
+    if not DATA.deliveryServer
       console.log "请指定分发服务器，分发失败".red
       return done null
 
-    packageAndDelivery data.output, deliveryServer, projectName, (err)-> done null
+    packageAndDelivery data.output, projectName, (err)-> done null
 
 #打包并分发
-packageAndDelivery = (output, deliveryServer, projectName, cb)->
-  #用户没有指定全url
-  deliveryServer = "http://192.168.8.#{deliveryServer}:1518" if deliveryServer.indexOf('http://') < 0
+packageAndDelivery = (output, projectName, cb)->
   #兼容windows，使用绝对路径tar打包会报错
   tarFile = "../#{projectName}.tar"
   task = {}
@@ -53,7 +61,7 @@ packageAndDelivery = (output, deliveryServer, projectName, cb)->
   queue.push(
     (done)->
       tarFile = _path.join output, tarFile
-      deliveryWithCurl tarFile, projectName, deliveryServer, (err)->
+      deliveryWithCurl tarFile, projectName, DATA.deliveryServer, (err)->
         #删除文件
         _fs.removeSync tarFile
         done err
@@ -70,8 +78,8 @@ packageAndDelivery = (output, deliveryServer, projectName, cb)->
   #提交git commit相关的任务信息
   queue.push(
     (done)->
-      task.target = TARGET
-      postTask APISERVER, task, -> done null
+      task.target = DATA.target
+      postTask DATA.apiServer, task, -> done null
   )
 
   _async.waterfall queue, (err)->
