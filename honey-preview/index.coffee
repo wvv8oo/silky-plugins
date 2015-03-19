@@ -175,8 +175,6 @@ packageProject = (output, tarFile, cb)->
 
 #向hoobot提交
 postTask = (task_server, data, cb)->
-  task_server = "http://127.0.0.1:1517/api/task"
-
   options =
     url: task_server
     method: 'POST'
