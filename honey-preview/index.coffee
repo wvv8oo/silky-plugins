@@ -24,6 +24,11 @@ exports.registerPlugin = (silky, pluginOptions)->
 
   #build完成后，提交到指定服务器
   silky.registerHook 'build:didBuild', {async: true}, (data, done)->
+    isOutput = _.find process.argv, (current)-> /^\-{1,2}o(utput)?$/i.test current
+    if isOutput
+      console.log "提示，已经指定本地输出目录，将不会提交至服务器".cyan
+      return done null
+
     projectName = pluginOptions.project_name || pluginOptions.projectName
     projectName = projectName || _path.basename(silky.options.workbench)
 
