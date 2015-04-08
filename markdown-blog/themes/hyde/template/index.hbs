@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{$$.plugin.blog.title}}</title>
+    {{import "module/head"}}
+</head>
+
+<body class="home-template">
+{{import "module/header"}}
+<div class="content container">
+    <div class="posts">
+        {{#each $$.plugin.posts}}
+            <div class="post">
+                <h1><a href="{{url}}">{{title}}</a></h1>
+                <span class="post-date">[{{date publish_date 'YYYY-MM-DD'}}]</span>
+                <div class="content">{{{plugin_content url}}}</div>
+                <p>&hellip;</p>
+            </div>
+        {{/each}}
+    </div>
+
+    <!-- Pagination links -->
+    <div class="pagination">
+        <a class="item previous{{#if $$.plugin.nav.previous}} show{{/if}}" href="{{$$.plugin.nav.previous}}.html">
+            &larr; 上一页
+        </a>
+        <a class="item next{{#if $$.plugin.nav.next}} show{{/if}}" href="{{$$.plugin.nav.next}}.html">
+            下一页 &rarr;
+        </a>
+    </div>
+</div>
+
+{{import "module/footer"}}
+</body>
+</html>
