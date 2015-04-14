@@ -1,6 +1,8 @@
 _cheerio = require 'cheerio'
 _ = require 'lodash'
 _fs = require 'fs-extra'
+_url = require 'url'
+
 #_uglify = require 'uglify-js'
 
 ##压缩内联的js
@@ -55,8 +57,9 @@ exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
   silky.registerHook 'route:willResponse', {}, (data, done)->
+    url = _url.parse data.request.url
     #非html不用处理
-    return if not /\.html$/.test data.request.url
+    return if not /\.html$/.test url.pathname
     #在不包含<script honey=的页面，不需要处理
     return if not /<script\s+honey=/i.test data.content
     data.content = combineHoney data.content
