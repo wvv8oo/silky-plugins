@@ -1,0 +1,9 @@
+{
+  "name": "jade-compiler",
+  "version": "0.0.1",
+  "description": "jade的编译器",
+  "dependencies": {
+    "jade": "^1.9.2",
+    "lodash": "^3.7.0"
+  }
+}

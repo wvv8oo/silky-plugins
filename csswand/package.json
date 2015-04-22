@@ -1,0 +1,5 @@
+{
+  "name": "csswand",
+  "version": "0.0.1",
+  "description": "自动扫描hbs文件，获取公共模板所依赖的css，注入至当前页面的less文件中"
+}
