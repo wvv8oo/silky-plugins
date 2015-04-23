@@ -12,8 +12,17 @@ exports.compiler = true
 
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
+  #编译器选项
+  compilerOptions =
+    #将要捕获的扩展名，可以是数组
+    capture: 'jade'
+    #编译后的扩展名
+    target: 'html'
+
   #注册一个编译器
-  silky.registerCompiler 'jade', (source, options, cb)->
+  silky.registerCompiler 'jade', compilerOptions, (source, options, cb)->
+    utils = silky.utils
+
     jadeOptions =
       filename: source
       pretty: true
@@ -21,7 +30,12 @@ exports.registerPlugin = (silky, pluginOptions)->
     _.extend jadeOptions, silky.data.json
 
     #读取文件
-    content = silky.utils.readFile source
+    content = utils.readFile source
     content = _jade.render content, jadeOptions
-    silky.utils.writeFile source if options.save and options.output
+
+
+    if options.save and options.target
+      target = utils.replaceExt options.target, '.html'
+      utils.writeFile target, content
+
     cb null, content

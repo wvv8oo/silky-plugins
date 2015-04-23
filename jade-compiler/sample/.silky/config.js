@@ -11,13 +11,14 @@ module.exports = {
         //根据扩展名匹配编译器
         extension: {
             //根据扩展名匹配编译器
-            //html: 'jade'
+            html: 'jade'
         }
     },
     //build的配置
     build: {
         //构建的目标目录，命令行指定的优先
         output: "./build",
+        ignore: [/^module$/i],
         //是否压缩
         compress: {
             //将要忽略压缩的文件
