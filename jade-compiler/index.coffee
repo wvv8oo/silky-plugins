@@ -2,7 +2,7 @@
 #    E-mail: wvv8oo@gmail.com
 #    Date: 4/17/15 5:47 PM
 #    Description: jade的编译器
-_jade = require 'jade'
+_jade = null
 _ = require 'lodash'
 
 #标识这是一个silky插件
@@ -21,6 +21,7 @@ exports.registerPlugin = (silky, pluginOptions)->
 
   #注册一个编译器
   silky.registerCompiler 'jade', compilerOptions, (source, options, cb)->
+    _jade = require 'jade' = if not _jade
     utils = silky.utils
 
     jadeOptions =
