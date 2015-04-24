@@ -1,0 +1,8 @@
+{
+  "name": "babel-compiler",
+  "version": "0.0.1",
+  "description": "babel编译器，编译jsx和es6",
+  "dependencies": {
+
+  }
+}
