@@ -63,14 +63,13 @@ exports.registerPlugin = (silky, pluginOptions)->
     #在不包含<script honey=的页面，不需要处理
     return if not /<script\s+honey=/i.test data.content
     data.content = combineHoney data.content
-    return
 
-  silky.registerHook 'build:didCompile', {async: true}, (data, done)->
-    return done null if not /\.html$/.test data.target
-    content = _fs.readFileSync data.target, 'utf-8'
+  silky.registerHook 'build:willCompress', {async: true}, (data, done)->
+    return done null if not /\.html$/.test data.path
+    content = _fs.readFileSync data.path, 'utf-8'
     return done null if not /<script\s+honey=/i.test content
 
     content = combineHoney content
-    _fs.outputFileSync data.target, content
+    _fs.outputFileSync data.path, content
     done null
 

@@ -21,7 +21,7 @@ exports.registerPlugin = (silky, pluginOptions)->
 
   #注册一个编译器
   silky.registerCompiler 'jade', compilerOptions, (source, options, cb)->
-    _jade = require 'jade' = if not _jade
+    _jade = require 'jade' if not _jade
     utils = silky.utils
 
     jadeOptions =
