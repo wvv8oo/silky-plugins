@@ -2,6 +2,7 @@ _cheerio = require 'cheerio'
 _ = require 'lodash'
 _fs = require 'fs-extra'
 _url = require 'url'
+_path = require 'path'
 
 #_uglify = require 'uglify-js'
 
@@ -52,10 +53,51 @@ combineHoney = (content)->
   $('body').append html
   $.html()
 
+#添加系统变量
+appendSystemVariable = (silky)->
+  isProduction = silky.utils.isProduction
+  project_name = silky.config.name || _path.basename silky.options.workbench
+
+  cssProduction = "http://css.hunantv.com/#{project_name}/"
+  jsProduction = "http://js.hunantv.com/#{project_name}/"
+  imgProduction = "http://img.hunantv.com/#{project_name}/"
+  pubImgProduction = "#{imgProduction}imgotv-pub/"
+  pubFontProduct = "#{cssProduction}imgotv-pub/font/"
+
+  variables =
+    #css的位置
+    __css: if isProduction then cssProduction else "/css/"
+    __js: if isProduction then jsProduction else "/js/"
+    __img: if isProduction then imgProduction else "/image/"
+    __pub_tmpl: "/imgotv-pub/template/"
+    __project: project_name
+    __pub_img: if isProduction then pubImgProduction else "/imgotv-pub/image/"
+    __pub_font: if isProduction then pubFontProduct else "/font/"
+
+  #把变量加到global中去
+  jsonData = silky.data.json
+  jsonData.global = jsonData.global || {}
+  _.defaults jsonData.global, variables
+
+  #把变量加到less中
+  lessData = silky.data.less
+  lessData.global = lessData.global || ''
+  lessData.global += "
+      @__project: '#{variables.__project}';
+      @__img: '#{variables.__img}';
+      @__pub_img: '#{variables.__pub_img}';
+      @__pub_less: '../imgotv-pub/css/';
+      @__pub_font: '#{variables.__pub_font}';
+  "
+
 #标识这是一个silky插件
 exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
+  #在build和路由启动的时候，加入系统变量
+  silky.registerHook 'route:initial', -> appendSystemVariable silky
+  silky.registerHook 'build:initial', -> appendSystemVariable silky
+
   silky.registerHook 'route:willResponse', {}, (data, done)->
     url = _url.parse data.request.url
     #非html不用处理
