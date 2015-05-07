@@ -62,17 +62,26 @@ appendSystemVariable = (silky)->
   jsProduction = "http://js.hunantv.com/#{project_name}/"
   imgProduction = "http://img.hunantv.com/#{project_name}/"
   pubImgProduction = "#{imgProduction}imgotv-pub/"
-  pubFontProduct = "#{cssProduction}imgotv-pub/font/"
+  pubFontProduction = "#{cssProduction}imgotv-pub/font/"
+  pubCssProduction = "http://css.hunantv.com/imgotv-pub/"
 
   variables =
+    #公共的css路径
+    __pub_css: if isProduction then pubCssProduction else "/imgotv-pub/css/"
     #css的位置
     __css: if isProduction then cssProduction else "/css/"
+    #js路径
     __js: if isProduction then jsProduction else "/js/"
+    #图片路径
     __img: if isProduction then imgProduction else "/image/"
+    #公共模板
     __pub_tmpl: "/imgotv-pub/template/"
+    #项目名称
     __project: project_name
+    #公共库的图片
     __pub_img: if isProduction then pubImgProduction else "/imgotv-pub/image/"
-    __pub_font: if isProduction then pubFontProduct else "/font/"
+    #公共库的字体
+    __pub_font: if isProduction then pubFontProduction else "/font/"
 
   #把变量加到global中去
   jsonData = silky.data.json
