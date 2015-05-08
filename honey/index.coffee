@@ -91,6 +91,8 @@ appendSystemVariable = (silky)->
     __pub_tmpl_widget: "#{pubTemplate}widget/"
     #全局组件的css
     __pub_css_comp: if isProduction then pubCssCompProduction else "/imgotv-pub/css/component/"
+    #demo图片的地址
+    __img_demo: if isProduction then "http://image-demo.lab.hunantv.com/#{project_name}/" else "/image-demo/"
 
   #把变量加到global中去
   jsonData = silky.data.json
