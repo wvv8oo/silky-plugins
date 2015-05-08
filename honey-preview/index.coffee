@@ -29,7 +29,7 @@ exports.registerPlugin = (silky, pluginOptions)->
       console.log "提示，已经指定本地输出目录，将不会提交至服务器".cyan
       return done null
 
-    projectName = pluginOptions.project_name || pluginOptions.projectName
+    projectName = silky.config.name || pluginOptions.project_name || pluginOptions.projectName
     projectName = projectName || _path.basename(silky.options.workbench)
 
     #获取将要递送的服务器

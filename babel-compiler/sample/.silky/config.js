@@ -6,13 +6,11 @@ module.exports = {
     compiler: {
         //根据路由规则匹配编译器
         rules: [
-            {path: /index\.html$/i, compiler: "jade"}
-        ],
-        //根据扩展名匹配编译器
-        extension: {
-            //根据扩展名匹配编译器
-            html: 'jade'
-        }
+            //将es6文件夹下所有的js，都交给es6编译器处理
+            {path: /es6\/.+\.js$/i, compiler: "babel.es6"},
+            //将react文件夹下的所有js，都交给react编译器处理
+            {path: /react\/.+\.js$/i, compiler: "babel.jsx"}
+        ]
     },
     //build的配置
     build: {

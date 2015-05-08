@@ -20,11 +20,11 @@ exports.registerPlugin = (silky, pluginOptions)->
     return
 
   #编译后，处理前缀
-  silky.registerHook 'build:didCompile', {async: true}, (data, done)->
-    return done null if not /\.css$/.test data.target
-    content = _fs.readFileSync data.target, 'utf-8'
+  silky.registerHook 'build:willCompress', {async: true}, (data, done)->
+    return done null if not /\.css$/.test data.path
+    content = _fs.readFileSync data.path, 'utf-8'
 
     content = autoprefixHandler content
-    _fs.outputFileSync data.target, content
+    _fs.outputFileSync data.path, content
     done null
 

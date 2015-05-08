@@ -1,6 +1,6 @@
 {
   "name": "autoprefix",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "处理less的CSS3前缀问题",
   "dependencies": {
     "autoprefixer-core": "^5.0.0",
