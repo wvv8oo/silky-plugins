@@ -106,7 +106,7 @@ appendSystemVariable = (silky)->
       @__project: '#{variables.__project}';
       @__img: '#{variables.__img}';
       @__pub_img: '#{variables.__pub_img}';
-      @__pub_less: pubLess;
+      @__pub_less: '#{pubLess}';
       @__pub_font: '#{variables.__pub_font}';
       @__pub_less_widget: '#{pubLess}widget';
       @__pub_less_function: '#{pubLess}function';
