@@ -88,7 +88,7 @@ appendSystemVariable = (silky)->
     __pub_tmpl_comp: "#{pubTemplate}component/"
     #__pub_tmpl_module: "#{pubTemplate}module"
     __pub_tmpl_ui: "#{pubTemplate}ui"
-    __pub_tmpl_widget: "#{pubTemplate}widget"
+    __pub_tmpl_widget: "#{pubTemplate}widget/"
     #全局组件的css
     __pub_css_comp: if isProduction then pubCssCompProduction else "/imgotv-pub/css/component/"
 
