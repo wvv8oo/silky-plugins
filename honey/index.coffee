@@ -64,6 +64,7 @@ appendSystemVariable = (silky)->
   pubImgProduction = "#{imgProduction}imgotv-pub/"
   pubFontProduction = "#{cssProduction}imgotv-pub/font/"
   pubCssProduction = "http://css.hunantv.com/imgotv-pub/"
+  pubCssCompProduction = "http://css.hunantv.com/standard/"
 
   pubTemplate = "/imgotv-pub/template/"
   variables =
@@ -84,9 +85,12 @@ appendSystemVariable = (silky)->
     #公共库的字体
     __pub_font: if isProduction then pubFontProduction else "/font/"
     #公共模板
-    __pub_tmpl_module: "#{pubTemplate}module"
+    __pub_tmpl_comp: "#{pubTemplate}component"
+    #__pub_tmpl_module: "#{pubTemplate}module"
     __pub_tmpl_ui: "#{pubTemplate}ui"
     __pub_tmpl_widget: "#{pubTemplate}widget"
+    #全局组件的css
+    __pub_css_comp: if isProduction then pubCssCompProduction else "/imgotv-pub/css/component/"
 
   #把变量加到global中去
   jsonData = silky.data.json
@@ -95,7 +99,7 @@ appendSystemVariable = (silky)->
 
   #把变量加到less中
   pubLess = "../imgotv-pub/css/";
-  pubIncludeLess = "#{pubLess}include";
+#  pubIncludeLess = "#{pubLess}include";
   lessData = silky.data.less
   lessData.global = lessData.global || ''
   lessData.global += "
@@ -104,10 +108,10 @@ appendSystemVariable = (silky)->
       @__pub_img: '#{variables.__pub_img}';
       @__pub_less: pubLess;
       @__pub_font: '#{variables.__pub_font}';
-      @__pub_widget: '#{pubIncludeLess}widget';
-      @__pub_function: '#{pubIncludeLess}function';
-      @__pub_ui: '#{pubIncludeLess}ui';
-      @__pub_module: '#{pubIncludeLess}module';
+      @__pub_less_widget: '#{pubLess}widget';
+      @__pub_less_function: '#{pubLess}function';
+      @__pub_less_ui: '#{pubLess}ui';
+      @__module: 'module/';
   "
 
 #标识这是一个silky插件
