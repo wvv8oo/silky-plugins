@@ -85,7 +85,7 @@ appendSystemVariable = (silky)->
     #公共库的字体
     __pub_font: if isProduction then pubFontProduction else "/font/"
     #公共模板
-    __pub_tmpl_comp: "#{pubTemplate}component"
+    __pub_tmpl_comp: "#{pubTemplate}component/"
     #__pub_tmpl_module: "#{pubTemplate}module"
     __pub_tmpl_ui: "#{pubTemplate}ui"
     __pub_tmpl_widget: "#{pubTemplate}widget"
@@ -99,18 +99,18 @@ appendSystemVariable = (silky)->
 
   #把变量加到less中
   pubLess = "../imgotv-pub/css/";
-#  pubIncludeLess = "#{pubLess}include";
+  pubIncludeLess = "#{pubLess}include";
   lessData = silky.data.less
   lessData.global = lessData.global || ''
   lessData.global += "
       @__project: '#{variables.__project}';
       @__img: '#{variables.__img}';
       @__pub_img: '#{variables.__pub_img}';
-      @__pub_less: '#{pubLess}';
+      @__pub_less: '#{pubIncludeLess}';
       @__pub_font: '#{variables.__pub_font}';
-      @__pub_less_widget: '#{pubLess}widget';
-      @__pub_less_function: '#{pubLess}function';
-      @__pub_less_ui: '#{pubLess}ui';
+      @__pub_less_widget: '#{pubIncludeLess}/widget/';
+      @__pub_less_function: '#{pubIncludeLess}/function/';
+      @__pub_less_ui: '#{pubIncludeLess}/ui/';
       @__module: 'module/';
   "
 
