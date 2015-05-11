@@ -53,46 +53,72 @@ combineHoney = (content)->
   $('body').append html
   $.html()
 
+#获取环境变量
+getVariables = (env, server, project_name)->
+  previewServer = "http://#{server}.preview.lab.hunantv.com/#{project_name}/"
+  cssHunantv = "http://css.hunantv.com/#{project_name}/"
+  imgHunantv = "http://img.hunantv.com/#{project_name}/"
+  jsHunantv = "http://js.hunantv.com/#{project_name}/"
+  imgDemo = "http://image-demo.lab.hunantv.com/#{project_name}/"
+  pubTemplate = "/imgotv-pub/template/"
+  compDir = "imgotv-pub/component/"
+
+  data =
+    preview:
+      __css: "#{previewServer}css/"
+      __js: "#{previewServer}js/"
+      __img: "#{previewServer}image/"
+      __pub_img: "#{previewServer}image/imgotv-pub/"
+      __img_demo: imgDemo
+      __pub_font: "#{previewServer}/font/"
+      __base_url: "/#{project_name}/"
+      __pub_css_comp: "#{previewServer}css/#{compDir}"
+    development:
+      __css: "/css/"
+      __js: "/js/"
+      __img: "/image/"
+      __pub_img: "/imgotv-pub/image/"
+      __img_demo: "/image-demo/"
+      __pub_font: "/font/"
+      __base_url: "/"
+      __pub_css_comp: "/imgotv-pub/css/component/"
+    production:
+      __pub_font: "#{cssHunantv}/font/"
+      __css: cssHunantv
+      __js: jsHunantv
+      __img: imgHunantv
+      __img_demo: imgDemo
+      __pub_img: "#{imgHunantv}imgotv-demo/"
+      __base_url: "/#{project_name}/"
+      __pub_css_comp: "#{cssHunantv}#{compDir}"
+
+  variables = data[env]
+
+  _.extend variables,
+    __standard_css: "http://css.hunantv.com/standard/"
+    __pub_tmpl: pubTemplate
+    __project: project_name
+    __pub_tmpl_comp: "#{pubTemplate}component/"
+    __pub_tmpl_ui: "#{pubTemplate}ui/"
+    __pub_tmpl_widget: "#{pubTemplate}widget/"
+
+  variables
+
+#更改config的配置
+changeConfig = (silky)->
+  #添加路由配置
+#  routers = silky.config.routers
+#  buildRename = silky.config.rename
+#  buildRename.push
+#    {
+#      source: /^imgotv\-pub[\/|\\]\/(.+)/i, target: '/$1', next: false
+#    }
+
 #添加系统变量
 appendSystemVariable = (silky)->
-  isProduction = silky.utils.isProduction
   project_name = silky.config.name || _path.basename silky.options.workbench
 
-  cssProduction = "http://css.hunantv.com/#{project_name}/"
-  jsProduction = "http://js.hunantv.com/#{project_name}/"
-  imgProduction = "http://img.hunantv.com/#{project_name}/"
-  pubImgProduction = "#{imgProduction}imgotv-pub/"
-  pubFontProduction = "#{cssProduction}imgotv-pub/font/"
-  pubCssProduction = "http://css.hunantv.com/imgotv-pub/"
-  pubCssCompProduction = "http://css.hunantv.com/standard/"
-
-  pubTemplate = "/imgotv-pub/template/"
-  variables =
-    #公共的css路径
-    __pub_css: if isProduction then pubCssProduction else "/imgotv-pub/css/"
-    #css的位置
-    __css: if isProduction then cssProduction else "/css/"
-    #js路径
-    __js: if isProduction then jsProduction else "/js/"
-    #图片路径
-    __img: if isProduction then imgProduction else "/image/"
-    #公共模板
-    __pub_tmpl: pubTemplate
-    #项目名称
-    __project: project_name
-    #公共库的图片
-    __pub_img: if isProduction then pubImgProduction else "/imgotv-pub/image/"
-    #公共库的字体
-    __pub_font: if isProduction then pubFontProduction else "/font/"
-    #公共模板
-    __pub_tmpl_comp: "#{pubTemplate}component/"
-    #__pub_tmpl_module: "#{pubTemplate}module"
-    __pub_tmpl_ui: "#{pubTemplate}ui"
-    __pub_tmpl_widget: "#{pubTemplate}widget/"
-    #全局组件的css
-    __pub_css_comp: if isProduction then pubCssCompProduction else "/imgotv-pub/css/component/"
-    #demo图片的地址
-    __img_demo: if isProduction then "http://image-demo.lab.hunantv.com/#{project_name}/" else "/image-demo/"
+  variables = getVariables silky.options.env, 108, project_name
 
   #把变量加到global中去
   jsonData = silky.data.json
@@ -100,7 +126,7 @@ appendSystemVariable = (silky)->
   _.defaults jsonData.global, variables
 
   #把变量加到less中
-  pubLess = "../imgotv-pub/css/";
+  pubLess = "/imgotv-pub/css/";
   pubIncludeLess = "#{pubLess}include/";
   lessData = silky.data.less
   lessData.global = lessData.global || ''
@@ -123,7 +149,12 @@ exports.silkyPlugin = true
 exports.registerPlugin = (silky, pluginOptions)->
   #在build和路由启动的时候，加入系统变量
   silky.registerHook 'route:initial', -> appendSystemVariable silky
-  silky.registerHook 'build:initial', -> appendSystemVariable silky
+  silky.registerHook 'build:initial', ->
+    #build时没有指定环境，则假定为preview环境
+    #如果没有指定环境，则指定为preview环境，以解决上传到预览服务器的路径问题
+    #在正式编译的时候，环境会被设置为production环境
+    silky.options.env = 'preview' if not silky.options.original.env
+    appendSystemVariable silky
 
   silky.registerHook 'route:willResponse', {}, (data, done)->
     url = _url.parse data.request.url
