@@ -101,19 +101,20 @@ appendSystemVariable = (silky)->
 
   #把变量加到less中
   pubLess = "../imgotv-pub/css/";
-  pubIncludeLess = "#{pubLess}include";
+  pubIncludeLess = "#{pubLess}include/";
   lessData = silky.data.less
   lessData.global = lessData.global || ''
   lessData.global += "
       @__project: '#{variables.__project}';
       @__img: '#{variables.__img}';
       @__pub_img: '#{variables.__pub_img}';
-      @__pub_less: '#{pubIncludeLess}';
+      @__pub_less: '#{pubLess}';
       @__pub_font: '#{variables.__pub_font}';
-      @__pub_less_widget: '#{pubIncludeLess}/widget/';
-      @__pub_less_function: '#{pubIncludeLess}/function/';
-      @__pub_less_ui: '#{pubIncludeLess}/ui/';
+      @__pub_less_widget: '#{pubIncludeLess}widget/';
+      @__pub_less_function: '#{pubIncludeLess}function/';
+      @__pub_less_ui: '#{pubIncludeLess}ui/';
       @__module: 'module/';
+      @__pub_less_comp: '#{pubLess}component/';
   "
 
 #标识这是一个silky插件
