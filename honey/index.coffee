@@ -3,7 +3,6 @@ _ = require 'lodash'
 _fs = require 'fs-extra'
 _url = require 'url'
 _path = require 'path'
-
 #_uglify = require 'uglify-js'
 
 ##压缩内联的js
@@ -105,9 +104,54 @@ getVariables = (env, server, project_name)->
   variables
 
 #更改config的配置
-changeConfig = (silky)->
+appendConfig = (silky)->
   #添加路由配置
-#  routers = silky.config.routers
+  routers = silky.config.routers
+  silky.config.routers = routers.concat(
+    #图片的转发
+    [
+      {path: /^.image.imgotv\-pub.(.+)$/i, to: '/imgotv-pub/image/$1', static: true, next: false}
+    ]
+  )
+
+  build = silky.config.build
+  #重命名
+  build.rename = build.rename.concat(
+    [
+      #公共图片
+      {source: /^imgotv\-pub.image.(.+)/i, target: '/image/imgotv-pub/$1', next: false}
+      #公共的CSS
+      {source: /^imgotv\-pub.css.(.+)/i, target: '/css/imgotv-pub/$1', next: false}
+      #公共的字体
+      {source: /^imgotv\-pub.font.(.+)/i, target: '/css/imgotv-pub/font/$1', next: false}
+      #重命名source的问题
+      {source: /source\.(js)$/i, target: '$1', next: false}
+    ]
+  )
+
+  #忽略掉的文件
+  build.ignore = build.ignore.concat(
+    [
+      #模板中的module
+      /^template.module$/i
+      #css中的module
+      /^css.module$/i
+      #以.开头的
+      /(^|\/)\.(.+)$/
+      #以log为扩展名的
+      /\.(log)$/i
+      #node_modules，预防性的
+      /^node_modules$/i
+      #公共库中css的include
+      /^imgotv\-pub.css.include$/i
+      #不编译公共库的模板
+      /^imgotv\-pub.template$/i
+    ]
+  )
+
+#  console.log build.ignore.length
+#  process.exit 0
+
 #  buildRename = silky.config.rename
 #  buildRename.push
 #    {
@@ -143,18 +187,23 @@ appendSystemVariable = (silky)->
       @__pub_less_comp: '#{pubLess}component/';
   "
 
+
 #标识这是一个silky插件
 exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
   #在build和路由启动的时候，加入系统变量
-  silky.registerHook 'route:initial', -> appendSystemVariable silky
+  silky.registerHook 'route:initial', ->
+    appendSystemVariable silky
+    appendConfig silky
+
   silky.registerHook 'build:initial', ->
     #build时没有指定环境，则假定为preview环境
     #如果没有指定环境，则指定为preview环境，以解决上传到预览服务器的路径问题
     #在正式编译的时候，环境会被设置为production环境
     silky.options.env = 'preview' if not silky.options.original.env
     appendSystemVariable silky
+    appendConfig silky
 
   silky.registerHook 'route:willResponse', {}, (data, done)->
     url = _url.parse data.request.url
