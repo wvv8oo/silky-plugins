@@ -87,7 +87,7 @@ getVariables = (env, server, project_name)->
       __js: jsHunantv
       __img: imgHunantv
       __img_demo: imgDemo
-      __pub_img: "#{imgHunantv}imgotv-demo/"
+      __pub_img: "#{imgHunantv}imgotv-pub/"
       __base_url: "/#{project_name}/"
       __pub_css_comp: "#{cssHunantv}#{compDir}"
 
