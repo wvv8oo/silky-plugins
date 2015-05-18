@@ -53,7 +53,7 @@ combineHoney = (content)->
   $.html()
 
 #获取环境变量
-getVariables = (env, server, project_name)->
+getVariables = (silky, server, project_name)->
   previewServer = "http://#{server}.preview.lab.hunantv.com/#{project_name}/"
   cssHunantv = "http://css.hunantv.com/#{project_name}/"
   imgHunantv = "http://img.hunantv.com/#{project_name}/"
@@ -91,7 +91,7 @@ getVariables = (env, server, project_name)->
       __base_url: "/#{project_name}/"
       __pub_css_comp: "#{cssHunantv}#{compDir}"
 
-  variables = data[env]
+  variables = data[silky.options.env]
 
   _.extend variables,
     __standard_css: "http://css.hunantv.com/standard/"
@@ -100,6 +100,7 @@ getVariables = (env, server, project_name)->
     __pub_tmpl_comp: "#{pubTemplate}component/"
     __pub_tmpl_ui: "#{pubTemplate}ui/"
     __pub_tmpl_widget: "#{pubTemplate}widget/"
+    __pub_dev: silky.utils.isDevelopment
 
   variables
 
@@ -163,7 +164,7 @@ appendSystemVariable = (silky)->
   project_name = silky.config.name || _path.basename silky.options.workbench
 
   #server = silky.options.extra
-  variables = getVariables silky.options.env, 108, project_name
+  variables = getVariables silky, 108, project_name
 
   #把变量加到global中去
   jsonData = silky.data.json
