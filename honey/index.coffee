@@ -121,7 +121,7 @@ appendConfig = (silky)->
       #公共图片
       {source: /^imgotv\-pub.image.(.+)/i, target: '/image/imgotv-pub/$1', next: false}
       #公共的CSS
-      {source: /^imgotv\-pub.css.(.+)/i, target: '/css/imgotv-pub/$1', next: false}
+      {source: /^imgotv\-pub.css.component.(.+)/i, target: '/css/imgotv-pub/component/$1', next: false}
       #公共的字体
       {source: /^imgotv\-pub.font.(.+)/i, target: '/css/imgotv-pub/font/$1', next: false}
       #重命名source的问题
@@ -162,6 +162,7 @@ appendConfig = (silky)->
 appendSystemVariable = (silky)->
   project_name = silky.config.name || _path.basename silky.options.workbench
 
+  #server = silky.options.extra
   variables = getVariables silky.options.env, 108, project_name
 
   #把变量加到global中去
@@ -201,7 +202,8 @@ exports.registerPlugin = (silky, pluginOptions)->
     #build时没有指定环境，则假定为preview环境
     #如果没有指定环境，则指定为preview环境，以解决上传到预览服务器的路径问题
     #在正式编译的时候，环境会被设置为production环境
-    silky.options.env = 'preview' if not silky.options.original.env
+    #不再使用preview环境，build直接使用production环境即可
+    #silky.options.env = 'preview' if not silky.options.original.env
     appendSystemVariable silky
     appendConfig silky
 
