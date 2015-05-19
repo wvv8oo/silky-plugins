@@ -100,7 +100,7 @@ getVariables = (silky, server, project_name)->
     __pub_tmpl_comp: "#{pubTemplate}component/"
     __pub_tmpl_ui: "#{pubTemplate}ui/"
     __pub_tmpl_widget: "#{pubTemplate}widget/"
-    __pub_dev: silky.utils.isDevelopment
+    __pub_dev: String(silky.utils.isDevelopment)
 
   variables
 
