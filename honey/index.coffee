@@ -61,6 +61,8 @@ getVariables = (silky, server, project_name)->
   imgDemo = "http://image-demo.lab.hunantv.com/#{project_name}/"
   pubTemplate = "/imgotv-pub/template/"
   compDir = "imgotv-pub/component/"
+  honeyRootDev = 'http://honey.hunantv.com/honey/src/'
+  honeyRootProduction = 'http://honey.hunantv.com/honey-2.0/'
 
   data =
     preview:
@@ -72,6 +74,7 @@ getVariables = (silky, server, project_name)->
       __pub_font: "#{previewServer}/font/"
       __base_url: "/#{project_name}/"
       __pub_css_comp: "#{previewServer}css/#{compDir}"
+      __honey_root: honeyRootProduction
     development:
       __css: "/css/"
       __js: "/js/"
@@ -81,6 +84,7 @@ getVariables = (silky, server, project_name)->
       __pub_font: "/font/"
       __base_url: "/"
       __pub_css_comp: "/imgotv-pub/css/component/"
+      __honey_root: honeyRootDev
     production:
       __pub_font: "#{cssHunantv}/font/"
       __css: cssHunantv
@@ -90,6 +94,7 @@ getVariables = (silky, server, project_name)->
       __pub_img: "#{imgHunantv}imgotv-pub/"
       __base_url: "/#{project_name}/"
       __pub_css_comp: "#{cssHunantv}#{compDir}"
+      __honey_root: honeyRootProduction
 
   variables = data[silky.options.env]
 
