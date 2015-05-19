@@ -81,7 +81,7 @@ getVariables = (silky, server, project_name)->
       __img: "/image/"
       __pub_img: "/imgotv-pub/image/"
       __img_demo: "/image-demo/"
-      __pub_font: "/font/"
+      __pub_font: "/imgotv-pub/font/"
       __base_url: "/"
       __pub_css_comp: "/imgotv-pub/css/component/"
       __honey_root: honeyRootDev
