@@ -10,7 +10,7 @@ _merge = require './merge'
 exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
-  #在build和路由启动的时候，加入系统变量
+#在build和路由启动的时候，加入系统变量
   silky.registerHook 'route:initial', -> _override.convert silky
   silky.registerHook 'build:initial', -> _override.convert silky
 
