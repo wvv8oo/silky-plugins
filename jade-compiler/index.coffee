@@ -39,4 +39,4 @@ exports.registerPlugin = (silky, pluginOptions)->
       target = utils.replaceExt options.target, '.html'
       utils.writeFile target, content
 
-    cb null, content
+    cb null, content, target

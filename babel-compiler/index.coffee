@@ -35,4 +35,4 @@ registerReactCompiler = (compilerName, capture, silky)->
         target = utils.replaceExt options.target, '.js'
         utils.writeFile target, content
 
-      cb null, content
+      cb null, content, target
