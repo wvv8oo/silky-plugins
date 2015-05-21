@@ -8,7 +8,7 @@ _fs = require 'fs-extra'
 _path = require 'path'
 
 #全局的css路径
-_globalCSS = 'css/global.css'
+_globalCSS = '/css/imgotv-pub/global.css'
 #所有的component/css
 _componentCSS = []
 

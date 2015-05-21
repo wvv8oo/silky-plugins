@@ -73,9 +73,10 @@ appendConfig = (silky)->
 #图片的转发
     [
       {path: /^.image.imgotv\-pub.(.+)$/i, to: '/imgotv-pub/image/$1', static: true, next: false}
-    ],[
-      {path: /^.css.global.css$/i, to: '/imgotv-pub/css/global.css', static: false, next: false}
     ]
+#    [
+#      {path: /^.css.global.css$/i, to: '/imgotv-pub/css/global.css', static: false, next: false}
+#    ]
   )
 
   build = silky.config.build
@@ -91,7 +92,7 @@ appendConfig = (silky)->
       #重命名source的问题
       {source: /source\.(js)$/i, target: '$1', next: false}
       #处理imgotv-pub根目录下的less和css
-      {source: /^imgotv\-pub.css.global\.(css|less)$/i, target: '/css/global.css', next: false}
+      {source: /^imgotv\-pub.css.global\.(css|less)$/i, target: '/css/imgotv-pub/global.css', next: false}
     ]
   )
 
