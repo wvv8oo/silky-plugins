@@ -125,6 +125,15 @@ appendConfig = (silky)->
 #      source: /^imgotv\-pub[\/|\\]\/(.+)/i, target: '/$1', next: false
 #    }
 
+#覆盖less的变量，跳过已经存在的变量
+overrideLessVariable = (data, key, value)->
+  key = "@#{key}"
+  reg = new RegExp "#{key}(\s+)?:.+;"
+  #global.less的变量已经存在，不再处理
+  return data if reg.test data
+
+  data += "\n#{key}: \"#{value}\";";
+
 #添加系统变量
 appendSystemVariable = (silky)->
   project_name = silky.config.name || _path.basename silky.options.workbench
@@ -142,18 +151,21 @@ appendSystemVariable = (silky)->
   pubIncludeLess = "#{pubLess}include/";
   lessData = silky.data.less
   lessData.global = lessData.global || ''
-  lessData.global += "
-      @__project: '#{variables.__project}';
-      @__img: '#{variables.__img}';
-      @__pub_img: '#{variables.__pub_img}';
-      @__pub_less: '#{pubLess}';
-      @__pub_font: '#{variables.__pub_font}';
-      @__pub_less_widget: '#{pubIncludeLess}widget/';
-      @__pub_less_function: '#{pubIncludeLess}function/';
-      @__pub_less_ui: '#{pubIncludeLess}ui/';
-      @__module: 'module/';
-      @__pub_less_comp: '#{pubLess}component/';
-  "
+
+  lessVariables =
+    __project: "#{variables.__project}"
+    __img: "#{variables.__img}"
+    __pub_img: "#{variables.__pub_img}"
+    __pub_less: "#{pubLess}"
+    __pub_font: "#{variables.__pub_font}"
+    __pub_less_widget: "#{pubIncludeLess}widget/"
+    __pub_less_function: "#{pubIncludeLess}function/"
+    __pub_less_ui: "#{pubIncludeLess}ui/"
+    __module: "module/"
+    __pub_less_comp: "#{pubLess}component/"
+
+  for key, value of lessVariables
+    lessData.global = overrideLessVariable lessData.global, key, value
 
 exports.convert = (silky)->
   appendSystemVariable silky
