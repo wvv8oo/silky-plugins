@@ -1,6 +1,6 @@
 {
   "name": "honey",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "与honey相关的功能，比如合并honey的依赖库",
   "dependencies": {
     "cheerio": "0.15.0",
