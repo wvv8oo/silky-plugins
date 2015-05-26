@@ -86,6 +86,7 @@ exports.mergeGlobalCSS = (silky, data)->
 
   _.map files, (file)->
     file = _path.join data.output, file
+    return if not _fs.existsSync file
 
     content += silky.utils.readFile file
     #合并后，删除这个文件，因为这个文件已经没用了
