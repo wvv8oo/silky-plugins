@@ -77,13 +77,17 @@ exports.execute = (silky, data, content, makeCSS)->
 
 #合并所有的component到global.css
 exports.mergeGlobalCSS = (silky, data)->
-  #globalCSSFile = "/css/imgotv-pub/" + _globalCSS
-
-  content = ''
-
   files = _.unique _componentCSS
+  #globalCSSFile = "/css/imgotv-pub/" + _globalCSS
+  return if not (files and files.length)
   files.unshift _globalCSS
 
+  target = _path.join silky.options.output, _globalCSS
+  targetDir = _path.dirname target
+  #确保文件夹存在
+  _fs.ensureDirSync targetDir
+
+  content = ''
   _.map files, (file)->
     file = _path.join data.output, file
     return if not _fs.existsSync file
@@ -92,6 +96,4 @@ exports.mergeGlobalCSS = (silky, data)->
     #合并后，删除这个文件，因为这个文件已经没用了
     _fs.removeSync file
 
-  #保存为global.js
-  target = _path.join silky.options.output, _globalCSS
   silky.utils.writeFile target, content
