@@ -1,76 +1,40 @@
-_cheerio = require 'cheerio'
 _ = require 'lodash'
 _fs = require 'fs-extra'
 _url = require 'url'
+_path = require 'path'
 
-#_uglify = require 'uglify-js'
-
-##压缩内联的js
-#压缩JS后期会交给Silky，不需要在Honey中处理
-#compressInternalJavascript = (file, content)->
-#  try
-#    content = _uglify.minify(content, fromString: true).code
-#  catch e
-#    console.log "压缩HTML中的JS代码出错，详细错误如下：".red
-#    console.log "错误的文件 -> #{file}".red
-#    console.log content
-#    console.log e
-#    process.exit 0
-#
-#  content
-
-#合并honey中的依赖
-combineHoney = (content)->
-  $ = _cheerio.load content
-  deps = []
-  scripts = []
-  $('script[honey]').each ()->
-    $this = $(this)
-    #合并依赖
-    deps = _.union(deps,$this.attr('honey').split(','))
-    #临时保存脚本
-    scripts.push $this.html()
-    #删除这个script标签
-    $this.remove()
-
-  #没有找到标签
-  return content if scripts.length is 0
-
-  #处理合并项
-  html = "\thoney.go(\"#{_.compact(deps).join(',')}\", function() {\n"
-  #将所有的代码都封装到闭包中运行
-  for script in scripts
-    #不处理空的script
-    html += "\t(function(){\n#{script}\n\t}).call(this);\n\n"
-  html += '\n\t});'
-
-  #压缩内联的js
-#  html = compressInternalJavascript file, html if compress
-
-  html = "<script type='text/javascript'>\n#{html}\n</script>"
-  #将新的html合并到body里
-  $('body').append html
-  $.html()
+_override = require './override'
+_merge = require './merge'
 
 #标识这是一个silky插件
 exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
+#在build和路由启动的时候，加入系统变量
+  silky.registerHook 'route:initial', -> _override.convert silky
+  silky.registerHook 'build:initial', -> _override.convert silky
+
+  #将要响应的时候，
   silky.registerHook 'route:willResponse', {}, (data, done)->
     url = _url.parse data.request.url
     #非html不用处理
     return if not /\.html$/.test url.pathname
-    #在不包含<script honey=的页面，不需要处理
-    return if not /<script\s+honey=/i.test data.content
-    data.content = combineHoney data.content
-    return
 
+    #合并honey，但不合并css
+    data.content = _merge.execute silky, data, data.content, false
+    #替换掉所有的component/css
+    data.content = data.content.replace /type=.component\/css./ig, 'type="text/css"'
+
+  #编译后，处理honey和css
   silky.registerHook 'build:didCompile', {async: true}, (data, done)->
     return done null if not /\.html$/.test data.target
-    content = _fs.readFileSync data.target, 'utf-8'
-    return done null if not /<script\s+honey=/i.test content
 
-    content = combineHoney content
-    _fs.outputFileSync data.target, content
+    #读取文件，准备交给merge处理
+    content = _fs.readFileSync data.target, 'utf-8'
+    content = _merge.execute silky, data, content, true
+    silky.utils.writeFile data.target, content
     done null
 
+  #构建完成后，合并global css
+  silky.registerHook 'build:didMake', (data, done)->
+    _merge.mergeGlobalCSS silky, data

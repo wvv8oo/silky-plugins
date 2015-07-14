@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {{script "js/react.js"}}
+    {{script "js/react/main.js"}}
+    {{script "js/es6/main.js"}}
+</head>
+<body>
+<div>
+    <h3>JSX编译器</h3>
+    <div id="react-example"></div>
+    <h3>ES6 to ES5</h3>
+    <div id="es6-example"></div>
+</div>
+<script>
+    reactRender();
+
+    //es6
+    var dog = new Dog(document.getElementById('es6-example'), '小不点');
+    dog.sayHello()
+</script>
+</body>
+</html>
