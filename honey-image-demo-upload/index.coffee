@@ -13,7 +13,7 @@ exports.silkyPlugin = true
 defaultConfig = {
   "tmpDir": _path.join(_os.tmpDir(), 'silky-upload-client'), #临时文件夹
   "src": "image-demo", #需要上传的文件夹
-  "server": "http://image-demo.lab.hunantv.com", #服务器相关配置
+  "server": "http://192.168.8.108:12288", #服务器相关配置
   "method": {
     upload: "/upload", #文件上传路径
     vertify: "/vertify" #文件校验路径
@@ -66,6 +66,10 @@ exports.registerPlugin = (silky, options)->
         _fse.emptyDirSync(tmp)
         console.log "----------- Upload image completed! -----------"
         done()
+      )
+      .on("error", (err)->
+        console.log "上传失败！"
+        console.error err
       )
     )
   )

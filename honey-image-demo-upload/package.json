@@ -1,6 +1,6 @@
 {
   "name": "honey-image-demo-upload",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "图床",
   "dependencies": {
     "fs-extra": "^0.18.2",
