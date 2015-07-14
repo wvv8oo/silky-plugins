@@ -5,7 +5,7 @@
 defaultConfig = {
   "tmpDir": _path.join(_os.tmpDir(), 'silky-upload-client'), #临时文件夹
   "src": "image-demo", #需要上传的文件夹
-  "server": "http://image-demo.lab.hunantv.com", #服务器相关配置
+  "server": "http://192.168.8.108:12288", #服务器相关配置
   "method": {
     upload: "/upload", #文件上传路径
     vertify: "/vertify" #文件校验路径
@@ -27,5 +27,17 @@ defaultConfig = {
 ##### method
 不需要修改
 
+### 访问图片方式
+```
+http://192.168.8.108:12288/:project-name/:image-name
+
+:project-name 用项目名代替
+:image-name 用图片名代替
+
+例如
+
+http://192.168.8.108:12288/bhf/logo.png
+
+```
 
 
