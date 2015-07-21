@@ -14,7 +14,7 @@ getVariables = (silky, server, project_name)->
   imgDemo = "http://192.168.8.108:12288/#{project_name}/"
   pubTemplate = "/imgotv-pub/template/"
   compDir = "imgotv-pub/component/"
-  honeyRootDev = 'http://192.168.8.108:15526/src/'
+  honeyRootDev = 'http://honey.hunantv.com/src/'
   honeyRootProduction = 'http://honey.hunantv.com/honey-2.0/'
 
   data =
