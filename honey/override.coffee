@@ -58,7 +58,7 @@ getVariables = (silky, server, project_name)->
     __pub_tmpl_comp: "#{pubTemplate}component/"
     __pub_tmpl_ui: "#{pubTemplate}ui/"
     __pub_tmpl_widget: "#{pubTemplate}widget/"
-    __honey_is_dev: false
+    __honey_is_dev: String(false)
     __is_dev: String(silky.utils.isDevelopment)
     __honey_root: honeyRootProduction
 
