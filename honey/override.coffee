@@ -112,6 +112,10 @@ appendConfig = (silky)->
       /^imgotv\-pub.css.include$/i
 #不编译公共库的模板
       /^imgotv\-pub.template$/i
+#不编译公共库下的component下的module
+      /^imgotv\-pub.css.component.+(module|include)$/i
+#不编译temp
+      /^temp$/
     ]
   )
 
