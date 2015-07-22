@@ -43,7 +43,7 @@ exports.registerPlugin = (silky, options)->
   ZIPFOLDER = _path.join TEMPDIR, DISTDIR
   ZIPFILE = "#{ZIPFOLDER}.tar.gz"
 
-  silky.registerHook("build:initial", {async: true}, (data, done)->
+  silky.registerHook("plugin:run", {async: true}, (data, done)->
     console.log "----------- Uploading image to server... ----------- "
     #copy Dir To Tmp
     #delete tmp
