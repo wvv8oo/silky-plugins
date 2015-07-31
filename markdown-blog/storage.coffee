@@ -32,7 +32,6 @@ _cache =
 exports.initial = (rootDir)->
   filter = /\.(md|markdown|txt)$/i
   _md2json.scan rootDir, filter, null, (post, filename, stat)->
-
     return if not post
 
     nameWithoutExt = _path.basename(filename, _path.extname(filename))

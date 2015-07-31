@@ -10,6 +10,17 @@ _utils = require './utils'
 _rss = require './rss'
 _storage = require './storage'
 
+#处理404的错误
+exports.response404 = (data)->
+  data.realpath = _utils.getTemplateFile '404'
+  data.pluginData = _utils.getBaseData()
+
+  silky = _utils.global.silky
+  silky.compiler.execute 'hbs', data.realpath, (err, content)->
+    data.res.statusCode = 404
+    data.res.tyhpe = 'text/html'
+    data.res.end(content)
+
 #处理路由
 exports.didRequest = (data, done)->
   #不是配置的bashPath开头的，则不处理
@@ -43,13 +54,6 @@ rssHandler = (data, relativeUrl)->
   res.setHeader 'content-type', 'application/rss+xml'
   res.end _rss.generator()
 
-#处理404的错误
-notFoundHandler = (data)->
-  data.route.realpath = _utils.getTemplateFile '404'
-  data.route.type = data.route.compiler = 'hbs'
-  data.route.mime = 'text/html'
-  data.pluginData = _utils.getBaseData()
-
 #响应静态文件
 staticHandler = (data, relativeUrl, cb)->
   silky = _utils.global.silky
@@ -62,6 +66,8 @@ staticHandler = (data, relativeUrl, cb)->
   #文件存在，则直接返回
   return cb null if _fs.existsSync(data.route.realpath)
 
+  ###
+  #这段代码是要干什么，我都不记得了，妈蛋注释一定要写清楚啊
   #取得真实的源文件路径
   realpath = silky.compiler.sourceFile data.route.compiler, data.route.realpath
 
@@ -70,7 +76,10 @@ staticHandler = (data, relativeUrl, cb)->
   else
     #如果没有找到匹配的源文件，则按404处理
     notFoundHandler data
-
+  ###
+#  compileName = silky.compiler.detectFileType data.route.realpath
+#  silky.compiler.execute compileType, compileName, (err, result)->
+#  notFoundHandler data if
   return cb null
 
 

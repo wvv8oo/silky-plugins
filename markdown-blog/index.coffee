@@ -44,4 +44,7 @@ exports.registerPlugin = (silky, pluginOptions)->
   #接管路由
   silky.registerHook 'route:didRequest', {async: true}, (data, done)-> _router.didRequest(data, done)
 
+  #处理404
+  silky.registerHook 'route:notFound', {async: true}, (data, done)-> _router.response404 data
+
 
