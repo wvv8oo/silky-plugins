@@ -12,9 +12,8 @@ _ = require 'lodash'
 _qs = require 'querystring'
 
 DATA =
-  target: null
   apiServer: null
-  deliveryServer: null
+  deliveryServers: null
 
 #标识这是一个silky插件
 exports.silkyPlugin = true
@@ -32,45 +31,71 @@ exports.registerPlugin = (silky, pluginOptions)->
     projectName = silky.config.name || pluginOptions.project_name || pluginOptions.projectName
     projectName = projectName || _path.basename(silky.options.workbench)
 
-    #获取将要递送的服务器
-    DATA.deliveryServer = silky.options.extra || pluginOptions.server
-    #用户没有指定全url
-    if DATA.deliveryServer.indexOf('http://') < 0
-      DATA.deliveryServer = "http://192.168.8.#{DATA.deliveryServer}:1518"
+    #分析递送的服务器列表
+    DATA.deliveryServers = analysisServer(silky.options.extra || pluginOptions.server)
 
-    DATA.target = DATA.deliveryServer
-    DATA.target = RegExp.$1 if /192\.168\.8.(\d+)/.test DATA.target
-
-
-    if not DATA.deliveryServer
+    if DATA.deliveryServers.length is 0
       console.log "请指定分发服务器，分发失败".red
       return done null
 
-    packageAndDelivery data.output, projectName, (err)-> done null
+    #打包并分发文件
+    packageAndDelivery silky, data.output, projectName, (err)-> done null
+
+#分析多个服务器
+analysisServer = (serverText)->
+  result = []
+  return result if not serverText
+
+  _.map serverText.split(','), (current)->
+    if current.indexOf('http://') < 0
+      current = "http://192.168.8.#{current}:1518"
+    result.push current
+
+  result
+
+#递送到多个服务器
+deliveryToMultipleServer = (tarFile, projectName, task, cb)->
+  index = 0
+  _async.whilst(
+    -> index < DATA.deliveryServers.length
+    (done)->
+      server = DATA.deliveryServers[index++]
+      #采用curl的方式上传文件
+      deliveryWithCurl tarFile, projectName, server, (err)->
+        return done err if err
+
+        #提交部署的任务信息到服务器上
+        task.target = server
+        task.target = RegExp.$1 if /192\.168\.8.(\d+)/.test task.target
+
+        postTask DATA.apiServer, task, (err)->
+          if err
+              console.log "分发失败，请查看错误信息 -> #{server}".red
+              console.log err
+          else
+            console.log "分发成功 -> #{server}".green
+          done null
+    (err)->
+      console.log err if err
+      #删除文件
+      _fs.removeSync tarFile
+      cb err
+  )
+
 
 #打包并分发
-packageAndDelivery = (output, projectName, cb)->
+packageAndDelivery = (silky, output, projectName, cb)->
   #兼容windows，使用绝对路径tar打包会报错
-  tarFile = "../#{projectName}.tar"
+  tarFile = _path.join silky.options.workbench,  "../#{projectName}.tar"
   task = {}
 
   queue = []
 
   #打包项目
   queue.push(
-    (done)->
-      packageProject output, tarFile, (err)-> done err
+    (done)-> packageProject output, tarFile, (err)-> done err
   )
 
-  #分发到服务器
-  queue.push(
-    (done)->
-      tarFile = _path.join output, tarFile
-      deliveryWithCurl tarFile, projectName, DATA.deliveryServer, (err)->
-        #删除文件
-        _fs.removeSync tarFile
-        done err
-  )
 
   #收集本地git的信息
   queue.push(
@@ -80,21 +105,12 @@ packageAndDelivery = (output, projectName, cb)->
         done err
   )
 
-  #提交git commit相关的任务信息
+  #分发到多个服务器
   queue.push(
-    (done)->
-      task.target = DATA.target
-      postTask DATA.apiServer, task, -> done null
+    (done)-> deliveryToMultipleServer tarFile, projectName, task, done
   )
 
-  _async.waterfall queue, (err)->
-    if err
-      console.log "分发失败，请查看错误信息".red
-      console.log err
-    else
-      console.log "分发成功".green
-
-    cb null
+  _async.waterfall queue, cb
 
 
 #执行命令
@@ -212,8 +228,6 @@ deliveryWithCurl = (tarFile, projectName, server, cb)->
       message "分发项目出错，请查询错误信息"
       console.log message.red
       err = new Error(message)
-    else
-      console.log "分发项目成功".green
 
     cb err
 
