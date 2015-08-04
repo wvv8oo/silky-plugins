@@ -21,6 +21,13 @@ exports.silkyPlugin = true
 exports.registerPlugin = (silky, pluginOptions)->
   DATA.apiServer = pluginOptions.task_server || "http://192.168.8.66:1517/api/task"
 
+  #准备build
+  silky.registerHook 'build:initial', {priority: 99}, (data, done)->
+    #如果用户在参数中指定了环境，那么则不设置为preview环境
+    return if silky.options.original.env
+    #如果用户没有指定环境，则认为是用户手动编译，而非服务器自动编译
+    silky.options.env = 'preview'
+
   #build完成后，提交到指定服务器
   silky.registerHook 'build:didBuild', {async: true}, (data, done)->
     isOutput = _.find process.argv, (current)-> /^\-{1,2}o(utput)?$/i.test current

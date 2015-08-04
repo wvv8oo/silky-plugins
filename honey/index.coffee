@@ -11,8 +11,8 @@ exports.silkyPlugin = true
 #提供注册插件的入口
 exports.registerPlugin = (silky, pluginOptions)->
 #在build和路由启动的时候，加入系统变量
-  silky.registerHook 'route:initial', -> _override.convert silky
-  silky.registerHook 'build:initial', -> _override.convert silky
+  silky.registerHook 'route:initial', -> _override.convert silky, pluginOptions
+  silky.registerHook 'build:initial', -> _override.convert silky, pluginOptions
 
   #将要响应的时候，
   silky.registerHook 'route:willResponse', {}, (data, done)->

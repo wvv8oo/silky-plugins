@@ -138,11 +138,15 @@ overrideLessVariable = (data, key, value)->
   data += "\n#{key}: \"#{value}\";";
 
 #添加系统变量
-appendSystemVariable = (silky)->
+appendSystemVariable = (silky, options)->
   project_name = silky.config.name || _path.basename silky.options.workbench
 
-  #server = silky.options.extra
-  variables = getVariables silky, 108, project_name
+  server = silky.options.extra || options.server
+  if /[^\d]/.test server
+    silky.options.env = 'production'
+    console.log "警告：服务器必需且只能指定一个，已将环境默认设置为production".red
+
+  variables = getVariables silky, server, project_name
 
   #把变量加到global中去
   jsonData = silky.data.json
@@ -170,6 +174,6 @@ appendSystemVariable = (silky)->
   for key, value of lessVariables
     lessData.global = overrideLessVariable lessData.global, key, value
 
-exports.convert = (silky)->
-  appendSystemVariable silky
-  appendConfig silky
+exports.convert = (silky, options)->
+  appendSystemVariable silky, options
+  appendConfig silky, options
