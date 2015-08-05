@@ -10,6 +10,7 @@ _fs = require 'fs-extra'
 _async = require 'async'
 _ = require 'lodash'
 _qs = require 'querystring'
+_hostname = require('os').hostname()
 
 DATA =
   apiServer: null
@@ -35,6 +36,9 @@ exports.registerPlugin = (silky, pluginOptions)->
       console.log "提示，已经指定本地输出目录，将不会提交至服务器".cyan
       return done null
 
+    #如果参数中提供了lock，则写入锁定文件
+    if _.find(process.argv, (current)-> /^lock$/i.test current) then writeLockFile silky
+
     projectName = silky.config.name || pluginOptions.project_name || pluginOptions.projectName
     projectName = projectName || _path.basename(silky.options.workbench)
 
@@ -48,6 +52,16 @@ exports.registerPlugin = (silky, pluginOptions)->
     #打包并分发文件
     packageAndDelivery silky, data.output, projectName, (err)-> done null
 
+
+#写入锁定的json文件
+writeLockFile = (silky)->
+  content =
+    owner: _hostname
+    timestamp: new Date()
+
+  file = _path.join silky.options.output, ".lock"
+  _fs.writeJSONSync file, content
+
 #分析多个服务器
 analysisServer = (serverText)->
   result = []
@@ -55,6 +69,9 @@ analysisServer = (serverText)->
 
   _.map serverText.split(','), (current)->
     if current.indexOf('http://') < 0
+      #避免用户参数错误，出现非法的ip
+      return if not /^\d+$/.test current
+
       current = "http://192.168.8.#{current}:1518"
     result.push current
 
@@ -75,12 +92,14 @@ deliveryToMultipleServer = (tarFile, projectName, task, cb)->
         task.target = server
         task.target = RegExp.$1 if /192\.168\.8.(\d+)/.test task.target
 
+        console.log "正在向分发服务器提交数据，请稍稍后"
         postTask DATA.apiServer, task, (err)->
           if err
               console.log "分发失败，请查看错误信息 -> #{server}".red
               console.log err
           else
             console.log "分发成功 -> #{server}".green
+
           done null
     (err)->
       console.log err if err
@@ -224,7 +243,11 @@ postTask = (task_server, data, cb)->
 
 #通过curl的方式提交数据
 deliveryWithCurl = (tarFile, projectName, server, cb)->
-  params = _qs.stringify(project_name: projectName)
+  params = _qs.stringify(
+    project_name: projectName
+    owner: _hostname
+  )
+
   command = "curl -X POST -F \"#{params}\" -F \"attachment=@#{tarFile}\" #{server} --connect-timeout 9999999"
   console.log command
 
