@@ -37,7 +37,7 @@ exports.registerPlugin = (silky, pluginOptions)->
       return done null
 
     #如果参数中提供了lock，则写入锁定文件
-    if _.find(process.argv, (current)-> /^lock$/i.test current) then writeLockFile silky
+    if _.find(process.argv, (current)-> /^\-\-lock$/i.test current) then writeLockFile silky
 
     projectName = silky.config.name || pluginOptions.project_name || pluginOptions.projectName
     projectName = projectName || _path.basename(silky.options.workbench)
@@ -61,6 +61,7 @@ writeLockFile = (silky)->
 
   file = _path.join silky.options.output, ".lock"
   _fs.writeJSONSync file, content
+  console.log "Project has already locked by #{_hostname}.".white
 
 #分析多个服务器
 analysisServer = (serverText)->
