@@ -95,6 +95,8 @@ deliveryToMultipleServer = (tarFile, projectName, task, cb)->
 
         console.log "正在向分发服务器提交数据，请稍稍后"
         postTask DATA.apiServer, task, (err)->
+          console.log arguments
+          console.log server
           if err
               console.log "分发失败，请查看错误信息 -> #{server}".red
               console.log err
@@ -249,14 +251,17 @@ deliveryWithCurl = (tarFile, projectName, server, cb)->
     owner: _hostname
   )
 
-  command = "curl -X POST -F \"#{params}\" -F \"attachment=@#{tarFile}\" #{server} --connect-timeout 9999999"
+  params = "-F project_name=\"#{projectName}\" -F owner=\"#{_hostname}\""
+  command = "curl -X POST #{params} -F \"attachment=@#{tarFile}\" #{server} --connect-timeout 9999999"
   console.log command
 
   executeCommand command, (code, stdout, stderr)->
+    stdout = JSON.parse stdout
+    console.log stdout
     err = null
 
-    if code != 0
-      message "分发项目出错，请查询错误信息"
+    if code != 0 or stdout?.message?.indexOf "加锁" > -1
+      message = stdout?.message || "分发项目出错，请查询错误信息"
       console.log message.red
       err = new Error(message)
 
