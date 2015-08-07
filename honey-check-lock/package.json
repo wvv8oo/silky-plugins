@@ -1,0 +1,13 @@
+{
+  "name": "honey-check-lock",
+  "version": "0.0.1",
+  "description": "检测锁",
+  "dependencies": {
+    "async": "",
+    "fs-extra": "^0.18.2",
+    "fstream": "^1.0.4",
+    "mkdirp": "^0.5.0",
+    "request": "^2.55.0",
+    "tar": "^2.1.0"
+  }
+}
