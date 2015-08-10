@@ -142,9 +142,8 @@ appendSystemVariable = (silky, options)->
   project_name = silky.config.name || _path.basename silky.options.workbench
 
   server = silky.options.extra || options.server
-  if /[^\d]/.test server
-    silky.options.env = 'production'
-    console.log "警告：服务器必需且只能指定一个，已将环境默认设置为production".red
+  #预览环境下，必需指定
+  server = server.split(',')[0] if silky.options.env is 'preview' and server
 
   variables = getVariables silky, server, project_name
 
