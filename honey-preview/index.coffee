@@ -68,6 +68,13 @@ analysisServer = (serverText)->
   result = []
   return result if not serverText
 
+  #发布到正式服务器
+  if serverText is 'publish'
+#    result.push "http://127.0.0.1:1518"
+    result.push "http://10.1.172.104:1518"
+    return result
+
+  #发布到预览服务器列表
   _.map serverText.split(','), (current)->
     if current.indexOf('http://') < 0
       #避免用户参数错误，出现非法的ip
@@ -85,13 +92,18 @@ deliveryToMultipleServer = (tarFile, projectName, task, cb)->
     -> index < DATA.deliveryServers.length
     (done)->
       server = DATA.deliveryServers[index++]
+
       #采用curl的方式上传文件
-      deliveryWithCurl tarFile, projectName, server, (err)->
+      deliveryWithCurl tarFile, projectName, server, task, (err)->
         return done err if err
 
         #提交部署的任务信息到服务器上
         task.target = server
         task.target = RegExp.$1 if /192\.168\.8.(\d+)/.test task.target
+
+        if task.type is 'release'
+          console.log "成功发布至正式服务器".green
+          return done null
 
         console.log "正在向分发服务器提交数据，请稍稍后"
         postTask DATA.apiServer, task, (err)->
@@ -131,6 +143,9 @@ packageAndDelivery = (silky, output, projectName, cb)->
     (done)->
       collectGitInfo (err, data)->
         task = data
+        #发布到正式服务器
+        task.type = 'release' if silky.options.extra is 'publish'
+        task.tag = task.hash?.substr 0, 10
         done err
   )
 
@@ -169,18 +184,16 @@ executeCommand = (command, cb)->
 
 #分析本地的commit信息
 analyzeCommit = (source)->
-  result = {}
+  data =
+    hash: 'commit\\s(.+)\n'
+    email: 'author:\\s+.+<(.+)>\n'
+    timestamp: 'date:\\s+(.+)\n'
 
-  pattern = /^commit\s+(.+)\nauthor:\s+.+<(.+)>\ndate:\s+(.+)/i
-  result.message = source.replace pattern, (match, hash, email, timestamp)->
-    result.hash = hash
-    result.email = email
-    result.timestamp = new Date(timestamp).valueOf()
-    return ''
-
-  result.message = result.message.replace(/\n/, '').trim()
-  result
-
+  for key, value of data
+    pattern = new RegExp value, 'i'
+    data[key] = if pattern.test(source) then RegExp.$1 else ''
+    source = source.replace pattern, ''
+  data
 
 #从本地信息收集git相关的信息，包括commit, author，repos等
 collectGitInfo = (cb)->
@@ -245,15 +258,13 @@ postTask = (task_server, data, cb)->
     cb err
 
 #通过curl的方式提交数据
-deliveryWithCurl = (tarFile, projectName, server, cb)->
-  params = _qs.stringify(
-    project_name: projectName
-    owner: _hostname
-  )
+deliveryWithCurl = (tarFile, projectName, server, task, cb)->
+  data = _.extend {project_name: projectName, owner: _hostname}, task
+  params = []
+  for key, value of data
+    params.push "-F #{key}=\"#{value}\""
 
-  params = "-F project_name=\"#{projectName}\" -F owner=\"#{_hostname}\""
-  command = "curl -X POST #{params} -F \"attachment=@#{tarFile}\" #{server} --connect-timeout 9999999"
-  console.log command
+  command = "curl -X POST #{params.join(" ")} -F \"attachment=@#{tarFile}\" #{server} --connect-timeout 9999999"
 
   executeCommand command, (code, stdout, stderr)->
     stdout = JSON.parse stdout
